@@ -470,17 +470,42 @@
   .guide-toggle{
     display:inline-block;margin-top:8px;font-size:11px;color:#a0b394;
     cursor:pointer;letter-spacing:.1em;pointer-events:auto;
+    color:transparent;font-size:0;
   }
-  .guide-toggle:hover{color:#5f7a55;}
+  .guide-toggle::after{content:"收起 ▴";color:#a0b394;font-size:11px;letter-spacing:.1em;}
+  .guide.mini .guide-toggle::after{content:"展开 ▾";}
+  .guide-toggle:hover::after{color:#5f7a55;}
 
   @media (max-height:520px){
     .guide{display:none;}
   }
 
+  /* ===== 手机端：默认收起成角落小按钮，展开时避开祝福语 ===== */
   @media (max-width:520px){
     .tree{width:130px;height:220px;left:2%;}
     .dog{left:24%;}
     .cat{left:52%;}
+
+    /* 默认：只显示一个角落小圆钮 */
+    .guide{
+      top:auto;bottom:14px;left:14px;
+      max-width:calc(100vw - 28px);
+      padding:9px 13px 8px;
+      font-size:12px;line-height:1.85;
+      border-radius:14px;
+      animation:none;
+    }
+    /* 收起态：隐藏明细，只留标题行 + 「查看玩法」 */
+    .guide .grow{display:none;}
+    .guide b{font-size:12.5px;}
+    /* 手机端隐藏桌面端写死的「收起/展开」文字，统一用伪元素 */
+    .guide-toggle{color:transparent;font-size:0;}
+    .guide-toggle::after{content:"查看玩法 ▾";color:#a0b394;font-size:12px;}
+    .guide.mini .guide-toggle::after{content:"收起 ▴";}
+
+    /* 展开态：向上正常展开，依旧在底部，远离顶部祝福语 */
+    .guide.mini{max-width:calc(100vw - 28px);}
+    .guide.mini .grow{display:block;}
   }
 </style>
 </head>
@@ -747,16 +772,21 @@
   /* ---------- 提示面板收起/展开 ---------- */
   var guide = document.getElementById('guide');
   var gToggle = document.getElementById('guideToggle');
+  // 手机端：默认收起（无 .mini），点一下展开（加 .mini）
+  // 桌面端：默认展开（无 .mini），点一下收起（加 .mini）
+  // 文字统一由 CSS 伪元素控制，这里不再写 textContent
   gToggle.addEventListener('click', function(e){
     e.stopPropagation();
-    var mini = guide.classList.toggle('mini');
-    gToggle.textContent = mini ? '展开' : '收起';
+    guide.classList.toggle('mini');
   });
-  // 6秒后自动收起为小图标
-  setTimeout(function(){
-    guide.classList.add('mini');
-    gToggle.textContent = '展开';
-  }, 6500);
+
+  // 桌面端：6 秒后自动收起为小图标
+  var isMobile = window.matchMedia('(max-width:520px)').matches;
+  if(!isMobile){
+    setTimeout(function(){
+      guide.classList.add('mini');
+    }, 6500);
+  }
 })();
 </script>
 </body>
